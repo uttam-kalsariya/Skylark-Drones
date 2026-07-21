@@ -10,12 +10,15 @@ Light Theme & Sticky Header Implementation:
 
 import os
 import time
+import logging
+import concurrent.futures
 import streamlit as st
 from dotenv import load_dotenv
 
 import agent
 import monday_client
 
+logging.basicConfig(level=logging.INFO)
 load_dotenv()
 
 # Page Setup
@@ -371,6 +374,52 @@ html, body, [class*="css"], .stApp, [data-testid="stAppViewContainer"] {
     box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35) !important;
 }
 
+/* Disabled Send Button Styling when empty/processing */
+[data-testid="stChatInputSubmitButton"] button:disabled,
+[data-testid="stChatInputSubmitButton"] button[disabled] {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #cbd5e1 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
+
+/* ══ Animated Thinking / Status Indicator Bubble ══ */
+.thinking-bubble {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 10px 18px;
+    border-radius: 16px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #475569;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+    margin: 6px 0 14px 0;
+}
+.typing-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.typing-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #4f46e5;
+    border-radius: 50%;
+    animation: typingPulse 1.4s infinite ease-in-out;
+}
+.typing-dot:nth-child(1) { animation-delay: 0s; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingPulse {
+    0%, 60%, 100% { transform: scale(1); opacity: 0.35; }
+    30% { transform: scale(1.4); opacity: 1; }
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -658,44 +707,91 @@ for message in st.session_state.messages:
 
 placeholder_text = "Processing current query..." if st.session_state.is_processing else "Ask a BI question..."
 prompt = st.chat_input(placeholder_text, disabled=st.session_state.is_processing) or injected
+clean_prompt = (prompt or "").strip()
 
-if prompt and not st.session_state.is_processing:
-    st.session_state.is_processing = True
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
+if clean_prompt and not st.session_state.is_processing:
+    if len(clean_prompt) < 2:
+        st.toast("💡 Try asking a full question, e.g. 'Which work orders are overdue?'", icon="ℹ️")
+    else:
+        st.session_state.is_processing = True
+        with st.chat_message("user"):
+            st.markdown(clean_prompt)
+        st.session_state.messages.append({"role": "user", "content": clean_prompt})
 
-    with st.chat_message("assistant"):
-        thinking_placeholder = st.empty()
-        thinking_placeholder.markdown(
-            '<div style="color: #64748b; font-size: 0.85rem; padding: 6px 0; font-weight: 500;">Retrieving and processing live monday.com metrics...</div>',
-            unsafe_allow_html=True,
-        )
+        with st.chat_message("assistant"):
+            thinking_placeholder = st.empty()
 
-        try:
+            status_stages = [
+                "Analyzing monday.com data...",
+                "Cross-referencing boards...",
+                "Generating insights...",
+                "Formulating executive summary..."
+            ]
+
             t0 = time.time()
             history_for_agent = st.session_state.messages[:-1]
-            response_text = agent.run_agent(
-                user_message=prompt,
-                conversation_history=history_for_agent,
-            )
-            elapsed = round(time.time() - t0, 1)
-            st.session_state.query_count += 1
 
-            thinking_placeholder.empty()
+            try:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                    future = executor.submit(
+                        agent.run_agent,
+                        user_message=clean_prompt,
+                        conversation_history=history_for_agent,
+                    )
+                    stage_idx = 0
+                    while not future.done():
+                        status_text = status_stages[stage_idx % len(status_stages)]
+                        thinking_placeholder.markdown(f'''
+                        <div class="thinking-bubble">
+                            <div class="typing-dots">
+                                <span class="typing-dot"></span>
+                                <span class="typing-dot"></span>
+                                <span class="typing-dot"></span>
+                            </div>
+                            <span>{status_text}</span>
+                        </div>
+                        ''', unsafe_allow_html=True)
+                        stage_idx += 1
+                        time.sleep(1.6)
 
-            badge = f"{elapsed}s · Query #{st.session_state.query_count}"
-            st.markdown(f'<div class="resp-badge">⚡ LIVE DATA · {badge}</div>', unsafe_allow_html=True)
-            st.markdown(response_text)
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": response_text,
-                "badge": badge,
-            })
+                    response_text = future.result()
 
-        except Exception as e:
-            thinking_placeholder.empty()
-            st.error(f"Execution Error: {e}")
-        finally:
-            st.session_state.is_processing = False
-            st.rerun()
+                elapsed = round(time.time() - t0, 1)
+                st.session_state.query_count += 1
+                thinking_placeholder.empty()
+
+                badge = f"{elapsed}s · Query #{st.session_state.query_count}"
+                st.markdown(f'<div class="resp-badge">⚡ LIVE DATA · {badge}</div>', unsafe_allow_html=True)
+                st.markdown(response_text)
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": response_text,
+                    "badge": badge,
+                })
+
+            except Exception as err:
+                thinking_placeholder.empty()
+                err_str = str(err).lower()
+                logging.error(f"Error in run_agent: {err}", exc_info=True)
+
+                if "monday" in err_str or "graphql" in err_str or "connection" in err_str:
+                    friendly_err = "I couldn't reach monday.com right now. Please try again in a moment."
+                elif "gemini" in err_str or "quota" in err_str or "api" in err_str or "429" in err_str:
+                    friendly_err = "I'm having trouble generating a response right now. Please try again."
+                else:
+                    friendly_err = "An unexpected issue occurred while processing your request. Please try again."
+
+                st.markdown(f'''
+                <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 12px 16px; color: #991b1b; font-weight: 500; font-size: 0.88rem; margin: 8px 0;">
+                    ⚠️ {friendly_err}
+                </div>
+                ''', unsafe_allow_html=True)
+
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": f"⚠️ {friendly_err}",
+                    "badge": "Error",
+                })
+            finally:
+                st.session_state.is_processing = False
+                st.rerun()

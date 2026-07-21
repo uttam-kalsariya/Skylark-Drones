@@ -308,28 +308,42 @@ html, body, [class*="css"], .stApp, [data-testid="stAppViewContainer"] {
     display: inline-block;
 }
 
-/* Input Area (Polished Rounded Container with Indigo Accent) */
-[data-testid="stChatInputContainer"] {
+/* Chat Input Field Container (Clean Visible 1.5px Border & 24px Pill Shape) */
+[data-testid="stChatInputContainer"],
+[data-testid="stChatInput"],
+[data-testid="stChatInput"] > div,
+[data-testid="stChatInputContainer"] > div {
     background-color: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 16px !important;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
-    padding: 4px 8px !important;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    border: 1.5px solid #d0d4da !important;
+    border-radius: 24px !important;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08) !important;
+    transition: all 0.2s ease-in-out !important;
 }
-[data-testid="stChatInputContainer"]:hover {
+
+/* Hover State */
+[data-testid="stChatInputContainer"]:hover,
+[data-testid="stChatInput"]:hover,
+[data-testid="stChatInput"] > div:hover {
     border-color: #94a3b8 !important;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.10) !important;
 }
-[data-testid="stChatInputContainer"]:focus-within {
+
+/* Focus State (User clicks / types) */
+[data-testid="stChatInputContainer"]:focus-within,
+[data-testid="stChatInput"]:focus-within,
+[data-testid="stChatInput"] > div:focus-within {
     border-color: #4f46e5 !important;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15), 0 4px 12px rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 0 0 3.5px rgba(79, 70, 229, 0.15), 0 3px 10px rgba(15, 23, 42, 0.08) !important;
 }
+
+/* Textarea & Placeholder */
 [data-testid="stChatInput"] textarea {
     color: #0f172a !important;
     font-size: 0.93rem !important;
-    padding: 6px 10px !important;
+    background: transparent !important;
+    padding: 8px 14px !important;
 }
+
 [data-testid="stChatInput"] textarea::placeholder {
     color: #64748b !important;
 }
@@ -346,7 +360,9 @@ html, body, [class*="css"], .stApp, [data-testid="stAppViewContainer"] {
     align-items: center !important;
     justify-content: center !important;
     transition: all 0.2s ease-in-out !important;
+    margin-right: 4px !important;
 }
+
 [data-testid="stChatInputSubmitButton"] button:hover,
 [data-testid="stChatInputSubmitButton"] button:active {
     background-color: #4f46e5 !important;

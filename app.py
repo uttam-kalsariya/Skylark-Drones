@@ -308,42 +308,51 @@ html, body, [class*="css"], .stApp, [data-testid="stAppViewContainer"] {
     display: inline-block;
 }
 
-/* Input Area (Crisp Premium Border & Shadow) */
+/* Input Area (Polished Rounded Container with Indigo Accent) */
 [data-testid="stChatInputContainer"] {
     background-color: #ffffff !important;
-    border: 1.5px solid #94a3b8 !important;
-    border-radius: 14px !important;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08) !important;
-    transition: all 0.2s ease-in-out !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+    padding: 4px 8px !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 [data-testid="stChatInputContainer"]:hover {
-    border-color: #64748b !important;
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12) !important;
+    border-color: #94a3b8 !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
 }
 [data-testid="stChatInputContainer"]:focus-within {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.18), 0 6px 20px rgba(37, 99, 235, 0.10) !important;
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15), 0 4px 12px rgba(15, 23, 42, 0.08) !important;
 }
 [data-testid="stChatInput"] textarea {
     color: #0f172a !important;
     font-size: 0.93rem !important;
+    padding: 6px 10px !important;
 }
 [data-testid="stChatInput"] textarea::placeholder {
     color: #64748b !important;
 }
 
-/* Submit Button Icon in Input Box */
+/* Circular Send Button Icon inside Input Box */
 [data-testid="stChatInputSubmitButton"] button {
-    background-color: #eff6ff !important;
-    border: 1px solid #bfdbfe !important;
-    color: #2563eb !important;
-    border-radius: 8px !important;
-    transition: all 0.18s ease-in-out !important;
+    background-color: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #4f46e5 !important;
+    border-radius: 50% !important;
+    width: 34px !important;
+    height: 34px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease-in-out !important;
 }
-[data-testid="stChatInputSubmitButton"] button:hover {
-    background-color: #2563eb !important;
+[data-testid="stChatInputSubmitButton"] button:hover,
+[data-testid="stChatInputSubmitButton"] button:active {
+    background-color: #4f46e5 !important;
     color: #ffffff !important;
-    border-color: #2563eb !important;
+    border-color: #4f46e5 !important;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35) !important;
 }
 
 /* Custom Scrollbar */

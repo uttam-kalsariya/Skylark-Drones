@@ -12,7 +12,7 @@ A conversational AI assistant designed for founders and executive leaders to que
 
 ## 🔗 Live Links
 
-- **Live Prototype Demo**: [https://skylark-bi-agent.onrender.com](https://skylark-bi-agent.onrender.com) *(Paste deployed URL here)*
+- **Live Hosted Application**: [https://skylark-bi-agent-cyjk.onrender.com](https://skylark-bi-agent-cyjk.onrender.com)
 - **GitHub Repository**: [https://github.com/uttam-kalsariya/Skylark-Drones](https://github.com/uttam-kalsariya/Skylark-Drones)
 
 ---

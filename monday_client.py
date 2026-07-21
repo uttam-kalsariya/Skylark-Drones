@@ -125,10 +125,13 @@ def get_board_items(board_id: str | int) -> List[Dict[str, Any]]:
             }
             column_values {
               id
-              title
               text
               value
               type
+              column {
+                id
+                title
+              }
             }
           }
         }
@@ -153,7 +156,8 @@ def get_board_items(board_id: str | int) -> List[Dict[str, Any]]:
             col_vals = item.get("column_values", [])
             columns_dict = {}
             for col in col_vals:
-                title = col.get("title")
+                col_info = col.get("column") or {}
+                title = col_info.get("title") or col.get("id")
                 if title:
                     columns_dict[title] = col.get("text")
 
@@ -185,7 +189,12 @@ if __name__ == "__main__":
             for b in boards:
                 print(f"Board ID: {b['id']} | Name: {b['name']}")
 
-        target_board_id = os.getenv("WORK_ORDERS_BOARD_ID") or os.getenv("DEALS_BOARD_ID")
+        target_board_id = None
+        for env_key in ["DEALS_BOARD_ID", "WORK_ORDERS_BOARD_ID"]:
+            val = os.getenv(env_key)
+            if val and val.isdigit():
+                target_board_id = val
+                break
         if not target_board_id and boards:
             target_board_id = boards[0]["id"]
 

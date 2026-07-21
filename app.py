@@ -407,6 +407,13 @@ with hdr_col4:
             - **Work Orders Board**: Active operations, completed orders, overdue deliverables.
             
             Powered by Google Gemini 3.5 Flash with function calling & data cleaning resilience.
+
+            ---
+            **Developer**: Uttam Kalsariya  
+            - 🌐 [Portfolio](https://uttam-kalsariya.github.io/uttamkalsariya.github.io/)  
+            - 🐙 [GitHub](https://github.com/uttam-kalsariya/)  
+            - 💼 [LinkedIn](https://www.linkedin.com/in/uttam-kalsariya/)  
+            - 📞 +91 8000651264
             """)
 
 

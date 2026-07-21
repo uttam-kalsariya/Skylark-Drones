@@ -285,9 +285,20 @@ def run_agent_anthropic(user_message: str, conversation_history: Optional[List[D
 
 def run_local_fallback_analytics(user_message: str) -> str:
     """
-    Direct Rule-Based Intelligence Analytics engine.
+    Direct Intent & Local Analytics engine.
     Runs when LLM API rate limits are temporarily reached, guaranteeing 100% uptime with live monday.com metrics.
     """
+    msg_lower = user_message.strip().lower()
+
+    # 1. Casual Greetings & Chitchat
+    if msg_lower in ["hi", "hello", "hey", "greetings"]:
+        return "Hello! I am your Skylark Drones BI Assistant. How can I help you analyze your monday.com data today?"
+    if "how are you" in msg_lower:
+        return "I'm doing well, thank you! Ready to help you review deals, work orders, or sector insights."
+    if "help" in msg_lower and len(msg_lower) < 35:
+        return "Of course! What would you like to explore? You can check work orders, deals pipeline, sector breakdowns, or request an executive summary."
+
+    # 2. Deals / Work Orders Data Queries
     deals_data = query_monday_board("deals")
     wo_data = query_monday_board("work_orders")
 
@@ -347,8 +358,7 @@ def run_agent(user_message: str, conversation_history: Optional[List[Dict[str, A
             return run_agent_gemini(user_message, conversation_history, api_key=gemini_key)
         else:
             return run_local_fallback_analytics(user_message)
-    except Exception as err:
-        # Seamless fallback to direct live monday.com analytics if API quota or rate-limit issues occur
+    except Exception:
         return run_local_fallback_analytics(user_message)
 
 

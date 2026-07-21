@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: skylark-bi-agent
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run app.py --server.port=$PORT --server.address=0.0.0.0
+    envVars:
+      - key: DEALS_BOARD_ID
+        value: "5030094796"
+      - key: WORK_ORDERS_BOARD_ID
+        value: "5030094931"

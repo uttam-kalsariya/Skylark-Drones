@@ -179,6 +179,14 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
    - `WORK_ORDERS_BOARD_ID`
    - `DEALS_BOARD_ID`
 
+## 👤 Developer Profile & Contact
+
+**Uttam Kalsariya**  
+- **Portfolio**: [https://uttam-kalsariya.github.io/uttamkalsariya.github.io/](https://uttam-kalsariya.github.io/uttamkalsariya.github.io/)
+- **GitHub**: [https://github.com/uttam-kalsariya/](https://github.com/uttam-kalsariya/)
+- **LinkedIn**: [https://www.linkedin.com/in/uttam-kalsariya/](https://www.linkedin.com/in/uttam-kalsariya/)
+- **Phone**: +91 8000651264
+
 ---
 
-Built for Skylark Drones Technical Assignment.
+Built for Skylark Drones Technical Assignment by Uttam Kalsariya.

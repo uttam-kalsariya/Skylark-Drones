@@ -644,7 +644,7 @@ with st.sidebar:
 
     for label in quick_prompts:
         if st.button(label, use_container_width=True, key=f"qp_{label}", disabled=st.session_state.is_processing):
-            st.session_state["_inject_prompt"] = label
+            st.session_state.messages.append({"role": "user", "content": label})
             st.rerun()
 
     st.markdown("<hr style='margin: 16px 0;'>", unsafe_allow_html=True)
@@ -669,18 +669,17 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
 
-# ─── Main Interface Title Section ──────────────────────────────────────────────
-st.markdown("""
-<div>
-    <div class="hero-title">Business Intelligence Agent</div>
-    <div class="hero-subtitle">Query live pipeline metrics, work order statuses, sector performance, or request an executive summary.</div>
-</div>
-""", unsafe_allow_html=True)
-
-injected = st.session_state.pop("_inject_prompt", None)
-
-# Empty Chat Welcome Screen
+# ─── Main View: Welcome Screen vs Active Chat ──────────────────────────────────
 if not st.session_state.messages:
+    # 1. Hero Title & Subtitle (Only shown on empty welcome state)
+    st.markdown("""
+    <div>
+        <div class="hero-title">Business Intelligence Agent</div>
+        <div class="hero-subtitle">Query live pipeline metrics, work order statuses, sector performance, or request an executive summary.</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 2. Welcome Card
     st.markdown("""
     <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 2.5rem 2rem; margin-bottom: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02); text-align: center;">
         <div style="width: 48px; height: 48px; background-color: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; color: #2563eb; font-weight: 700; font-size: 1.1rem;">
@@ -695,36 +694,37 @@ if not st.session_state.messages:
     </div>
     """, unsafe_allow_html=True)
 
+    # 3. Suggested Queries Chips
     st.markdown("<div style='font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;'>Suggested Queries</div>", unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     with c1:
         st.markdown("<div class='chip-btn'>", unsafe_allow_html=True)
         if st.button("Give me a leadership update", key="chip1", use_container_width=True, disabled=st.session_state.is_processing):
-            st.session_state["_inject_prompt"] = "Give me a leadership update"
+            st.session_state.messages.append({"role": "user", "content": "Give me a leadership update"})
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
     with c2:
         st.markdown("<div class='chip-btn'>", unsafe_allow_html=True)
         if st.button("Which work orders are overdue?", key="chip2", use_container_width=True, disabled=st.session_state.is_processing):
-            st.session_state["_inject_prompt"] = "Which work orders are overdue?"
+            st.session_state.messages.append({"role": "user", "content": "Which work orders are overdue?"})
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
     with c3:
         st.markdown("<div class='chip-btn'>", unsafe_allow_html=True)
         if st.button("What is our total deal value by sector?", key="chip3", use_container_width=True, disabled=st.session_state.is_processing):
-            st.session_state["_inject_prompt"] = "What is our total deal value by sector?"
+            st.session_state.messages.append({"role": "user", "content": "What is our total deal value by sector?"})
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
-
-# ─── Render Conversation History ──────────────────────────────────────────────
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        if message["role"] == "assistant" and message.get("badge"):
-            st.markdown(f'<div class="resp-badge">⚡ LIVE DATA · {message["badge"]}</div>', unsafe_allow_html=True)
-        st.markdown(message["content"])
+else:
+    # Render Conversation History only when messages exist
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            if message["role"] == "assistant" and message.get("badge"):
+                st.markdown(f'<div class="resp-badge">⚡ LIVE DATA · {message["badge"]}</div>', unsafe_allow_html=True)
+            st.markdown(message["content"])
 
 placeholder_text = "Processing current query..." if st.session_state.is_processing else "Ask a BI question..."
-prompt = st.chat_input(placeholder_text, disabled=st.session_state.is_processing) or injected
+prompt = st.chat_input(placeholder_text, disabled=st.session_state.is_processing)
 clean_prompt = (prompt or "").strip()
 
 if clean_prompt and not st.session_state.is_processing:

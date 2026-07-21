@@ -95,15 +95,14 @@ def query_monday_board(board_name: str, filters: Optional[Dict[str, Any]] = None
         if filters and cleaned_result.get("cleaned_records"):
             filtered_records = []
             for rec in cleaned_result["cleaned_records"]:
-                cols = rec.get("columns", {})
                 match = True
                 for f_key, f_val in filters.items():
                     if f_val is None:
                         continue
                     f_key_lower = str(f_key).lower()
                     found_val = None
-                    for col_k, col_v in cols.items():
-                        if f_key_lower in col_k.lower():
+                    for col_k, col_v in rec.items():
+                        if f_key_lower in str(col_k).lower():
                             found_val = col_v
                             break
                     if found_val is None or str(f_val).lower() not in str(found_val).lower():

@@ -185,7 +185,18 @@ def clean_records(records: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], 
 
             cleaned_item: Dict[str, Any] = {}
             
-            for key, raw_value in record.items():
+            # Extract top-level metadata and flatten column fields
+            fields_to_process = {}
+            if "columns" in record and isinstance(record["columns"], dict):
+                fields_to_process["id"] = record.get("id")
+                fields_to_process["name"] = record.get("name")
+                fields_to_process["group"] = record.get("group")
+                fields_to_process["updated_at"] = record.get("updated_at")
+                fields_to_process.update(record["columns"])
+            else:
+                fields_to_process = record
+
+            for key, raw_value in fields_to_process.items():
                 key_lower = str(key).lower()
                 
                 # Check for missing values
@@ -204,7 +215,7 @@ def clean_records(records: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], 
                 elif any(num_kw in key_lower for num_kw in ["val", "value", "amount", "price", "budget", "cost", "revenue"]):
                     try:
                         raw_str = str(raw_value).replace(",", "").strip()
-                        cleaned_num_str = re.sub(r"[^\d.-]", "", raw_str)
+                        cleaned_num_str = re.sub(r"[^0-9.-]", "", raw_str)
                         cleaned_item[key] = float(cleaned_num_str) if cleaned_num_str else None
                         if cleaned_item[key] is None:
                             quality_report["malformed_fields"][key] = quality_report["malformed_fields"].get(key, 0) + 1

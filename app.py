@@ -80,30 +80,48 @@ html, body, [class*="css"], .stApp, [data-testid="stAppViewContainer"] {
     align-items: center !important;
 }
 
-/* Uniform Height & Alignment for Header Buttons & Popovers */
+/* Uniform Height, Borders, and Radius for Sticky Header Buttons & Popovers */
 [data-testid="stVerticalBlock"] > div:has(.hdr-anchor) button {
     height: 36px !important;
     min-height: 36px !important;
     border-radius: 8px !important;
     font-size: 0.82rem !important;
     font-weight: 600 !important;
-    padding: 0 12px !important;
+    padding: 0 14px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     background-color: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
-    color: #1e293b !important;
+    color: #475569 !important;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
     margin: 0 !important;
     width: 100% !important;
-    transition: all 0.18s ease-in-out !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
+/* Secondary Buttons Hover Lift Effect (Clear Chat & Kebab Menu) */
 [data-testid="stVerticalBlock"] > div:has(.hdr-anchor) button:hover {
     background-color: #f8fafc !important;
     border-color: #94a3b8 !important;
     color: #0f172a !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Primary Accent Styling for "New Chat" Button */
+[data-testid="stVerticalBlock"] > div:has(.hdr-anchor) [data-testid="stColumn"]:nth-child(2) button {
+    background-color: #eef2ff !important;
+    border: 1px solid #c7d2fe !important;
+    color: #4338ca !important;
+}
+
+[data-testid="stVerticalBlock"] > div:has(.hdr-anchor) [data-testid="stColumn"]:nth-child(2) button:hover {
+    background-color: #4f46e5 !important;
+    border-color: #4f46e5 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25) !important;
 }
 
 /* ══ Sidebar Styling ══ */

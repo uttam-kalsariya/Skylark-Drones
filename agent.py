@@ -114,13 +114,12 @@ def run_agent_gemini(user_message: str, conversation_history: Optional[List[Dict
     """Run agent using Google Gemini REST API with function calling and multi-model fallback."""
     import time
 
-    # Priority models for Gemini API (verified working endpoints first)
+    # Priority models for Gemini API (most capable first, falling back gracefully on quota limits)
     candidate_models = [
-        "gemini-3-flash-preview",
-        "gemini-3.1-flash-lite",
-        "gemini-3.1-flash-lite-preview",
-        "gemini-3.5-flash",
-        "gemini-flash-latest",
+        "gemini-2.5-pro",          # Most capable reasoning model
+        "gemini-3.5-flash",        # High performance & speed fallback
+        "gemini-3-flash-preview",  # Live fallback
+        "gemini-3.1-flash-lite",   # Lite fallback
     ]
 
     tools = [

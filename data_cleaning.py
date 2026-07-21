@@ -203,8 +203,8 @@ def clean_records(records: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], 
 
                 elif any(num_kw in key_lower for num_kw in ["val", "value", "amount", "price", "budget", "cost", "revenue"]):
                     try:
-                        # Clean currency symbols or numeric strings (e.g., "$10,000" -> 10000.0)
-                        cleaned_num_str = re.sub(r"[^\d.-]", "", str(raw_value))
+                        raw_str = str(raw_value).replace(",", "").strip()
+                        cleaned_num_str = re.sub(r"[^\d.-]", "", raw_str)
                         cleaned_item[key] = float(cleaned_num_str) if cleaned_num_str else None
                         if cleaned_item[key] is None:
                             quality_report["malformed_fields"][key] = quality_report["malformed_fields"].get(key, 0) + 1

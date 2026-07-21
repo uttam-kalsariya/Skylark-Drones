@@ -670,51 +670,53 @@ with st.sidebar:
 
 
 # ─── Main View: Welcome Screen vs Active Chat ──────────────────────────────────
+welcome_placeholder = st.empty()
 if not st.session_state.messages:
-    # 1. Hero Title & Subtitle (Only shown on empty welcome state)
-    st.markdown("""
-    <div>
-        <div class="hero-title">Business Intelligence Agent</div>
-        <div class="hero-subtitle">Query live pipeline metrics, work order statuses, sector performance, or request an executive summary.</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with welcome_placeholder.container():
+        # 1. Hero Title & Subtitle (Only shown on empty welcome state)
+        st.markdown("""
+        <div>
+            <div class="hero-title">Business Intelligence Agent</div>
+            <div class="hero-subtitle">Query live pipeline metrics, work order statuses, sector performance, or request an executive summary.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # 2. Welcome Card
-    st.markdown("""
-    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 2.5rem 2rem; margin-bottom: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02); text-align: center;">
-        <div style="width: 48px; height: 48px; background-color: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; color: #2563eb; font-weight: 700; font-size: 1.1rem;">
-            SD
+        # 2. Welcome Card
+        st.markdown("""
+        <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 2.5rem 2rem; margin-bottom: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02); text-align: center;">
+            <div style="width: 48px; height: 48px; background-color: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; color: #2563eb; font-weight: 700; font-size: 1.1rem;">
+                SD
+            </div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                Welcome to Skylark Drones BI Assistant
+            </div>
+            <div style="font-size: 0.88rem; color: #64748b; max-width: 460px; margin: 0 auto 20px auto; line-height: 1.6;">
+                Ask questions in plain English to dynamically retrieve real-time analytics from your monday.com Work Orders and Deals boards.
+            </div>
         </div>
-        <div style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
-            Welcome to Skylark Drones BI Assistant
-        </div>
-        <div style="font-size: 0.88rem; color: #64748b; max-width: 460px; margin: 0 auto 20px auto; line-height: 1.6;">
-            Ask questions in plain English to dynamically retrieve real-time analytics from your monday.com Work Orders and Deals boards.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    # 3. Suggested Queries Chips
-    st.markdown("<div style='font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;'>Suggested Queries</div>", unsafe_allow_html=True)
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.markdown("<div class='chip-btn'>", unsafe_allow_html=True)
-        if st.button("Give me a leadership update", key="chip1", use_container_width=True, disabled=st.session_state.is_processing):
-            st.session_state.messages.append({"role": "user", "content": "Give me a leadership update"})
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
-    with c2:
-        st.markdown("<div class='chip-btn'>", unsafe_allow_html=True)
-        if st.button("Which work orders are overdue?", key="chip2", use_container_width=True, disabled=st.session_state.is_processing):
-            st.session_state.messages.append({"role": "user", "content": "Which work orders are overdue?"})
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
-    with c3:
-        st.markdown("<div class='chip-btn'>", unsafe_allow_html=True)
-        if st.button("What is our total deal value by sector?", key="chip3", use_container_width=True, disabled=st.session_state.is_processing):
-            st.session_state.messages.append({"role": "user", "content": "What is our total deal value by sector?"})
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+        # 3. Suggested Queries Chips
+        st.markdown("<div style='font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;'>Suggested Queries</div>", unsafe_allow_html=True)
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.markdown("<div class='chip-btn'>", unsafe_allow_html=True)
+            if st.button("Give me a leadership update", key="chip1", use_container_width=True, disabled=st.session_state.is_processing):
+                st.session_state.messages.append({"role": "user", "content": "Give me a leadership update"})
+                st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
+        with c2:
+            st.markdown("<div class='chip-btn'>", unsafe_allow_html=True)
+            if st.button("Which work orders are overdue?", key="chip2", use_container_width=True, disabled=st.session_state.is_processing):
+                st.session_state.messages.append({"role": "user", "content": "Which work orders are overdue?"})
+                st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
+        with c3:
+            st.markdown("<div class='chip-btn'>", unsafe_allow_html=True)
+            if st.button("What is our total deal value by sector?", key="chip3", use_container_width=True, disabled=st.session_state.is_processing):
+                st.session_state.messages.append({"role": "user", "content": "What is our total deal value by sector?"})
+                st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
 else:
     # Render Conversation History only when messages exist
     for message in st.session_state.messages:

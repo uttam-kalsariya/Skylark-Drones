@@ -308,24 +308,42 @@ html, body, [class*="css"], .stApp, [data-testid="stAppViewContainer"] {
     display: inline-block;
 }
 
-/* Input Area */
+/* Input Area (Crisp Premium Border & Shadow) */
 [data-testid="stChatInputContainer"] {
     background-color: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
+    border: 1.5px solid #94a3b8 !important;
     border-radius: 14px !important;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05) !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08) !important;
     transition: all 0.2s ease-in-out !important;
+}
+[data-testid="stChatInputContainer"]:hover {
+    border-color: #64748b !important;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12) !important;
 }
 [data-testid="stChatInputContainer"]:focus-within {
     border-color: #2563eb !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12), 0 4px 16px rgba(15, 23, 42, 0.06) !important;
+    box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.18), 0 6px 20px rgba(37, 99, 235, 0.10) !important;
 }
 [data-testid="stChatInput"] textarea {
     color: #0f172a !important;
     font-size: 0.93rem !important;
 }
 [data-testid="stChatInput"] textarea::placeholder {
-    color: #94a3b8 !important;
+    color: #64748b !important;
+}
+
+/* Submit Button Icon in Input Box */
+[data-testid="stChatInputSubmitButton"] button {
+    background-color: #eff6ff !important;
+    border: 1px solid #bfdbfe !important;
+    color: #2563eb !important;
+    border-radius: 8px !important;
+    transition: all 0.18s ease-in-out !important;
+}
+[data-testid="stChatInputSubmitButton"] button:hover {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    border-color: #2563eb !important;
 }
 
 /* Custom Scrollbar */

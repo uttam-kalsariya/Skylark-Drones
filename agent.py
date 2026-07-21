@@ -362,7 +362,7 @@ def run_agent(user_message: str, conversation_history: Optional[List[Dict[str, A
 
     if anthropic_key and anthropic_key.startswith("sk-ant-"):
         return run_agent_anthropic(user_message, conversation_history, api_key=anthropic_key)
-    elif gemini_key and gemini_key.startswith("AIzaSy"):
+    elif gemini_key and (gemini_key.startswith("AIzaSy") or gemini_key.startswith("AQ.")):
         return run_agent_gemini(user_message, conversation_history, api_key=gemini_key)
     elif anthropic_key and not anthropic_key.startswith("your_"):
         return run_agent_anthropic(user_message, conversation_history, api_key=anthropic_key)
@@ -371,7 +371,7 @@ def run_agent(user_message: str, conversation_history: Optional[List[Dict[str, A
     else:
         raise ValueError(
             "Missing valid API Key in .env! "
-            "Please set ANTHROPIC_API_KEY (sk-ant-...) or Google AI Studio GEMINI_API_KEY (AIzaSy...)."
+            "Please set ANTHROPIC_API_KEY (sk-ant-...) or Google AI Studio GEMINI_API_KEY."
         )
 
 

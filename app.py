@@ -387,6 +387,8 @@ if "query_count" not in st.session_state:
     st.session_state.query_count = 0
 if "session_id" not in st.session_state:
     st.session_state.session_id = 1
+if "is_processing" not in st.session_state:
+    st.session_state.is_processing = False
 
 
 # ─── Top Header / Sticky Toolbar Component ─────────────────────────────────────
@@ -405,13 +407,13 @@ with hdr_col1:
     )
 
 with hdr_col2:
-    if st.button("➕ New Chat", use_container_width=True, key="hdr_new_chat"):
+    if st.button("➕ New Chat", use_container_width=True, key="hdr_new_chat", disabled=st.session_state.is_processing):
         st.session_state.messages = []
         st.session_state.session_id += 1
         st.rerun()
 
 with hdr_col3:
-    with st.popover("🗑️ Clear Chat", use_container_width=True):
+    with st.popover("🗑️ Clear Chat", use_container_width=True, disabled=st.session_state.is_processing):
         st.markdown("<div style='font-size:0.85rem; font-weight:600; color:#0f172a; margin-bottom:6px;'>Clear conversation history?</div>", unsafe_allow_html=True)
         st.markdown("<div style='font-size:0.78rem; color:#64748b; margin-bottom:12px;'>This will clear all messages in the current view.</div>", unsafe_allow_html=True)
         if st.button("Confirm Clear", type="primary", use_container_width=True, key="confirm_clear_btn"):
@@ -419,7 +421,7 @@ with hdr_col3:
             st.rerun()
 
 with hdr_col4:
-    with st.popover("•••", use_container_width=True):
+    with st.popover("•••", use_container_width=True, disabled=st.session_state.is_processing):
         st.markdown("<div style='font-size:0.82rem; font-weight:700; color:#0f172a; margin-bottom:10px;'>Options</div>", unsafe_allow_html=True)
 
         if st.session_state.messages:
@@ -574,7 +576,7 @@ with st.sidebar:
     ]
 
     for label in quick_prompts:
-        if st.button(label, use_container_width=True, key=f"qp_{label}"):
+        if st.button(label, use_container_width=True, key=f"qp_{label}", disabled=st.session_state.is_processing):
             st.session_state["_inject_prompt"] = label
             st.rerun()
 
@@ -582,11 +584,11 @@ with st.sidebar:
 
     col_clr, col_ref = st.columns([3, 1])
     with col_clr:
-        if st.button("Clear chat", use_container_width=True, key="clear_btn"):
+        if st.button("Clear chat", use_container_width=True, key="clear_btn", disabled=st.session_state.is_processing):
             st.session_state.messages = []
             st.rerun()
     with col_ref:
-        if st.button("↻", use_container_width=True, key="refresh_btn", help="Refresh board cache"):
+        if st.button("↻", use_container_width=True, key="refresh_btn", help="Refresh board cache", disabled=st.session_state.is_processing):
             st.cache_data.clear()
             st.rerun()
 
@@ -630,19 +632,19 @@ if not st.session_state.messages:
     c1, c2, c3 = st.columns(3)
     with c1:
         st.markdown("<div class='chip-btn'>", unsafe_allow_html=True)
-        if st.button("Give me a leadership update", key="chip1", use_container_width=True):
+        if st.button("Give me a leadership update", key="chip1", use_container_width=True, disabled=st.session_state.is_processing):
             st.session_state["_inject_prompt"] = "Give me a leadership update"
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
     with c2:
         st.markdown("<div class='chip-btn'>", unsafe_allow_html=True)
-        if st.button("Which work orders are overdue?", key="chip2", use_container_width=True):
+        if st.button("Which work orders are overdue?", key="chip2", use_container_width=True, disabled=st.session_state.is_processing):
             st.session_state["_inject_prompt"] = "Which work orders are overdue?"
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
     with c3:
         st.markdown("<div class='chip-btn'>", unsafe_allow_html=True)
-        if st.button("What is our total deal value by sector?", key="chip3", use_container_width=True):
+        if st.button("What is our total deal value by sector?", key="chip3", use_container_width=True, disabled=st.session_state.is_processing):
             st.session_state["_inject_prompt"] = "What is our total deal value by sector?"
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
@@ -654,9 +656,11 @@ for message in st.session_state.messages:
             st.markdown(f'<div class="resp-badge">⚡ LIVE DATA · {message["badge"]}</div>', unsafe_allow_html=True)
         st.markdown(message["content"])
 
-prompt = st.chat_input("Ask a BI question...") or injected
+placeholder_text = "Processing current query..." if st.session_state.is_processing else "Ask a BI question..."
+prompt = st.chat_input(placeholder_text, disabled=st.session_state.is_processing) or injected
 
-if prompt:
+if prompt and not st.session_state.is_processing:
+    st.session_state.is_processing = True
     with st.chat_message("user"):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -692,3 +696,6 @@ if prompt:
         except Exception as e:
             thinking_placeholder.empty()
             st.error(f"Execution Error: {e}")
+        finally:
+            st.session_state.is_processing = False
+            st.rerun()

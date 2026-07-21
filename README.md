@@ -172,7 +172,7 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
 2. Create new Web Service on Render or Streamlit Community Cloud.
 3. Configure build & start commands:
    - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `streamlit run app.py --server.port $PORT`
+   - **Start Command**: `streamlit run app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true`
 4. Set Environment Variables in deployment platform dashboard:
    - `MONDAY_API_TOKEN`
    - `GEMINI_API_KEY`

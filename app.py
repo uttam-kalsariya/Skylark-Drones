@@ -723,93 +723,102 @@ else:
                 st.markdown(f'<div class="resp-badge">⚡ LIVE DATA · {message["badge"]}</div>', unsafe_allow_html=True)
             st.markdown(message["content"])
 
+# Check if there is an unresponded user query (e.g. from chip click or chat_input submission)
+has_unresponded_user_msg = (
+    bool(st.session_state.messages)
+    and st.session_state.messages[-1]["role"] == "user"
+)
+
 placeholder_text = "Processing current query..." if st.session_state.is_processing else "Ask a BI question..."
 prompt = st.chat_input(placeholder_text, disabled=st.session_state.is_processing)
-clean_prompt = (prompt or "").strip()
 
+clean_prompt = (prompt or "").strip()
 if clean_prompt and not st.session_state.is_processing:
     if len(clean_prompt) < 2:
         st.toast("💡 Try asking a full question, e.g. 'Which work orders are overdue?'", icon="ℹ️")
     else:
-        st.session_state.is_processing = True
-        with st.chat_message("user"):
-            st.markdown(clean_prompt)
         st.session_state.messages.append({"role": "user", "content": clean_prompt})
+        st.rerun()
 
-        with st.chat_message("assistant"):
-            thinking_placeholder = st.empty()
+# ─── Process Pending User Query with Thinking Indicator ───────────────────────
+if has_unresponded_user_msg and not st.session_state.is_processing:
+    st.session_state.is_processing = True
+    user_query = st.session_state.messages[-1]["content"]
 
-            status_stages = [
-                "Analyzing monday.com data...",
-                "Cross-referencing boards...",
-                "Generating insights...",
-                "Formulating executive summary..."
-            ]
+    with st.chat_message("assistant"):
+        thinking_placeholder = st.empty()
 
-            t0 = time.time()
-            history_for_agent = st.session_state.messages[:-1]
+        status_stages = [
+            "Analyzing monday.com data...",
+            "Cross-referencing boards...",
+            "Generating insights...",
+            "Formulating executive summary..."
+        ]
 
-            try:
-                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-                    future = executor.submit(
-                        agent.run_agent,
-                        user_message=clean_prompt,
-                        conversation_history=history_for_agent,
-                    )
-                    stage_idx = 0
-                    while not future.done():
-                        status_text = status_stages[stage_idx % len(status_stages)]
-                        thinking_placeholder.markdown(f'''
-                        <div class="thinking-bubble">
-                            <div class="typing-dots">
-                                <span class="typing-dot"></span>
-                                <span class="typing-dot"></span>
-                                <span class="typing-dot"></span>
-                            </div>
-                            <span>{status_text}</span>
+        t0 = time.time()
+        history_for_agent = st.session_state.messages[:-1]
+
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(
+                    agent.run_agent,
+                    user_message=user_query,
+                    conversation_history=history_for_agent,
+                )
+                stage_idx = 0
+                while not future.done():
+                    status_text = status_stages[stage_idx % len(status_stages)]
+                    thinking_placeholder.markdown(f'''
+                    <div class="thinking-bubble">
+                        <div class="typing-dots">
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
                         </div>
-                        ''', unsafe_allow_html=True)
-                        stage_idx += 1
-                        time.sleep(1.6)
+                        <span>{status_text}</span>
+                    </div>
+                    ''', unsafe_allow_html=True)
+                    stage_idx += 1
+                    time.sleep(1.6)
 
-                    response_text = future.result()
+                response_text = future.result()
 
-                elapsed = round(time.time() - t0, 1)
-                st.session_state.query_count += 1
-                thinking_placeholder.empty()
+            elapsed = round(time.time() - t0, 1)
+            st.session_state.query_count += 1
+            thinking_placeholder.empty()
 
-                badge = f"{elapsed}s · Query #{st.session_state.query_count}"
-                st.markdown(f'<div class="resp-badge">⚡ LIVE DATA · {badge}</div>', unsafe_allow_html=True)
-                st.markdown(response_text)
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": response_text,
-                    "badge": badge,
-                })
+            badge = f"{elapsed}s · Query #{st.session_state.query_count}"
+            st.markdown(f'<div class="resp-badge">⚡ LIVE DATA · {badge}</div>', unsafe_allow_html=True)
+            st.markdown(response_text)
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": response_text,
+                "badge": badge,
+            })
 
-            except Exception as err:
-                thinking_placeholder.empty()
-                err_str = str(err).lower()
-                logging.error(f"Error in run_agent: {err}", exc_info=True)
+        except Exception as err:
+            thinking_placeholder.empty()
+            err_str = str(err).lower()
+            logging.error(f"Error in run_agent: {err}", exc_info=True)
 
-                if "monday" in err_str or "graphql" in err_str or "connection" in err_str:
-                    friendly_err = "I couldn't reach monday.com right now. Please try again in a moment."
-                elif "gemini" in err_str or "quota" in err_str or "api" in err_str or "429" in err_str:
-                    friendly_err = "I'm having trouble generating a response right now. Please try again."
-                else:
-                    friendly_err = "An unexpected issue occurred while processing your request. Please try again."
+            if "monday" in err_str or "graphql" in err_str or "connection" in err_str:
+                friendly_err = "I couldn't reach monday.com right now. Please try again in a moment."
+            elif "gemini" in err_str or "quota" in err_str or "api" in err_str or "429" in err_str:
+                friendly_err = "I'm having trouble generating a response right now. Please try again."
+            else:
+                friendly_err = "An unexpected issue occurred while processing your request. Please try again."
 
-                st.markdown(f'''
-                <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 12px 16px; color: #991b1b; font-weight: 500; font-size: 0.88rem; margin: 8px 0;">
-                    ⚠️ {friendly_err}
-                </div>
-                ''', unsafe_allow_html=True)
+            st.markdown(f'''
+            <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 12px 16px; color: #991b1b; font-weight: 500; font-size: 0.88rem; margin: 8px 0;">
+                ⚠️ {friendly_err}
+            </div>
+            ''', unsafe_allow_html=True)
 
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": f"⚠️ {friendly_err}",
-                    "badge": "Error",
-                })
-            finally:
-                st.session_state.is_processing = False
-                st.rerun()
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": f"⚠️ {friendly_err}",
+                "badge": "Error",
+            })
+        finally:
+            st.session_state.is_processing = False
+            st.rerun()
